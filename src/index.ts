@@ -14,6 +14,15 @@ const dbName = "tasks";
 const app = express();
 const server = http.createServer(app);
 
+app.use((req, res, next) => {
+    if (process.env.inMaintenance === "true") {
+        res.status(503).send('Site is currently down. Please try again later.');
+        res.end();
+    } else {
+        next();
+    }
+});
+
 app.use(express.json());
 app.use(cors({ origin: '*' }));
 

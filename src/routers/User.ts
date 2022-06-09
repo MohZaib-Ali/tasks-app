@@ -1,5 +1,6 @@
 import { Router } from "express";
 import UserModel from "../db/models/User";
+import auth from "../middleware/auth";
 
 const router = Router();
 
@@ -8,22 +9,35 @@ router.post("/users", async (req, res) => {
 
   try {
     await user.save();
-    res.status(201).send(user);
+    const token = await user.getToken();
+    res.status(201).send({ user, token });
   } catch (e) {
-    res.status(400).send(e);
+    res.status(400).send({error: e});
   }
 });
 
-router.post("/users", async (req, res) => {
+router.post("/users/login", async (req, res) => {
   try {
-    const user = await UserModel.findByCredentials(req.body.email, req.body.password);
-    res.status(200).send(user);
+    const user = await UserModel.findByCredentials(
+      req.body.email,
+      req.body.password
+    );
+    const token = await user.getToken();
+    res.status(200).send({ user, token });
   } catch (e) {
     res.status(400).send(e);
   }
 });
 
-router.get("/users", async (req, res) => {
+router.post("/users/logout", async (req, res) => {
+  try {
+    req.user.tokens = req.user.tokens.filter((token: string) => token !== req.token);
+  } catch (e) {
+    res.status(400).send(e);
+  }
+});
+
+router.get("/users", auth, async (req, res) => {
   try {
     const users = await UserModel.find({});
     res.send(users);
@@ -32,7 +46,7 @@ router.get("/users", async (req, res) => {
   }
 });
 
-router.get("/users/:id", async (req, res) => {
+router.get("/users/:id", auth, async (req, res) => {
   const _id = req.params.id;
 
   try {
@@ -48,7 +62,7 @@ router.get("/users/:id", async (req, res) => {
   }
 });
 
-router.patch("/users/:id", async (req, res) => {
+router.patch("/users/:id", auth, async (req, res) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = ["name", "email", "password", "age"];
   const isValidOperation = updates.every((update) =>
@@ -61,7 +75,7 @@ router.patch("/users/:id", async (req, res) => {
 
   try {
     const user = await UserModel.findById(req.params.id);
-    updates.forEach((update) => (user as any)[update] = req.body[update]);
+    updates.forEach((update) => ((user as any)[update] = req.body[update]));
     await user.save();
 
     if (!user) {
@@ -74,7 +88,7 @@ router.patch("/users/:id", async (req, res) => {
   }
 });
 
-router.delete("/users/:id", async (req, res) => {
+router.delete("/users/:id", auth, async (req, res) => {
   try {
     const user = await UserModel.findByIdAndDelete(req.params.id);
 

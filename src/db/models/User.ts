@@ -1,6 +1,7 @@
 import { Model, model, Schema } from "mongoose";
 import validator from "validator";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 const userSchema = new Schema({
   name: {
@@ -12,6 +13,7 @@ const userSchema = new Schema({
     type: String,
     required: true,
     lowercase: true,
+    unique: true,
     trim: true,
     validate: (value: string) => {
       if (!validator.isEmail(value)) {
@@ -58,6 +60,11 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+userSchema.methods.getToken = function async() {
+  const token = jwt.sign({ _id: this._id.toString() }, process.env.SECRET_KEY, { expiresIn: '5d' });
+  return token;
+};
+
 interface UserDocument extends Document {
   name: string;
   email: string;
@@ -65,9 +72,13 @@ interface UserDocument extends Document {
   password: string;
 }
 
-interface UserModelInterface extends Model<UserDocument> {
-  findByCredentials(email: string, password: string): any;
+interface UserDocModel extends UserDocument {
+  getToken(): () => {};
 }
 
-const UserModel = model<UserDocument, UserModelInterface>("User", userSchema);
+interface UserModelInterface extends Model<UserDocModel> {
+  findByCredentials(email: string, password: string): UserDocModel;
+}
+
+const UserModel = model<UserDocModel, UserModelInterface>("User", userSchema);
 export default UserModel;
