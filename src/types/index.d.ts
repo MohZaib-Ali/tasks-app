@@ -2,10 +2,11 @@ export {};
 
 import { UserDocument } from "../db/models/User";
 
-declare global {
-  namespace Express {
-    interface Request {
+declare namespace Express {
+  export interface Request {
       user: UserDocument;
-    }
+  }
+  export interface Response {
+      user: UserDocument;
   }
 }

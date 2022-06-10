@@ -1,9 +1,9 @@
-import { Router } from "express";
+import { Request, Response, Router } from "express";
 import TaskModel from "../db/models/Task";
 import auth from "../middleware/auth";
 const router = Router();
 
-router.post("/tasks", auth, async (req, res) => {
+router.post("/tasks", auth, async (req: Request, res: Response) => {
   const task = new TaskModel({ ...req.body, owner: req.user._id });
   try {
     await task.save();
@@ -13,19 +13,19 @@ router.post("/tasks", auth, async (req, res) => {
   }
 });
 
-router.get("/tasks", auth, async (req, res) => {
+router.get("/tasks", auth, async (req: Request, res: Response) => {
   try {
     const { completed, limit, skip, sortBy } = req.query;
     const [key, direction] = sortBy.toString().split(":");
     const sortObj: any = {};
-    sortObj[key] = direction === "desc" ? -1 : 1;;
+    sortObj[key] = direction === "desc" ? -1 : 1;
     await req.user.populate({
       path: "tasks",
       match: { ...(!!completed && { completed }) },
       options: {
         ...(!!limit && { limit }),
         ...(!!skip && { skip }),
-        ...(!!sortBy && {sort: sortObj}),
+        ...(!!sortBy && { sort: sortObj }),
       },
     });
     res.send(req.user.tasks);
@@ -34,7 +34,7 @@ router.get("/tasks", auth, async (req, res) => {
   }
 });
 
-router.get("/tasks/:id", auth, async (req, res) => {
+router.get("/tasks/:id", auth, async (req: Request, res: Response) => {
   const _id = req.params.id;
   try {
     const task = await TaskModel.findOne({ _id, owner: req.user._id });
@@ -49,7 +49,7 @@ router.get("/tasks/:id", auth, async (req, res) => {
   }
 });
 
-router.patch("/tasks/:id", auth, async (req, res) => {
+router.patch("/tasks/:id", auth, async (req: Request, res: Response) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = ["description", "completed"];
   const isValidOperation = updates.every((update) =>
@@ -77,7 +77,7 @@ router.patch("/tasks/:id", auth, async (req, res) => {
   }
 });
 
-router.delete("/tasks/:id", auth, async (req, res) => {
+router.delete("/tasks/:id", auth, async (req: Request, res: Response) => {
   try {
     const task = await TaskModel.findOneAndDelete({
       _id: req.params.id,

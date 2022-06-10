@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
 import UserModel from "../db/models/User";
-import { NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
-const auth = async (req: any, res: Response, next: NextFunction) => {
+const auth = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.header("Authorization")) {
       throw new Error("No Authorization Token Provided.")

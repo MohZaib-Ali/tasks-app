@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Request, Response, Router } from "express";
 import multer, { diskStorage } from "multer";
 import UserModel from "../db/models/User";
 import auth from "../middleware/auth";
@@ -9,7 +9,7 @@ const router = Router();
 
 // const storage = diskStorage({
 //   destination: "avatars",
-//   filename: (req, file, callback) => {
+//   filename: (req: Request, fil: Response, callback) => {
 //     callback(null, `${req.user._id}.${file.originalname.split(".")[1]}`);
 //   },
 // });
@@ -21,7 +21,7 @@ const avatarUpload = multer({
       : cb(undefined, true),
 });
 
-router.post("/users", async (req, res) => {
+router.post("/users", async (req: Request, res: Response) => {
   const user = new UserModel(req.body);
   try {
     await user.save();
@@ -40,7 +40,7 @@ router.post(
   "/users/avatar",
   auth,
   avatarUpload.single("avatar"),
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     try {
       const buffer = await sharp(req.file.buffer)
         .resize({ width: 250, height: 250 })
@@ -55,7 +55,7 @@ router.post(
   }
 );
 
-router.get("/users/avatar", auth, async (req, res) => {
+router.get("/users/avatar", auth, async (req: Request, res: Response) => {
   if (!req.user.avatar) {
     throw new Error("User avatar not found");
   }
@@ -63,7 +63,7 @@ router.get("/users/avatar", auth, async (req, res) => {
   res.send(req.user.avatar);
 });
 
-router.get("/users/:id/avatar", async (req, res) => {
+router.get("/users/:id/avatar", async (req: Request, res: Response) => {
   const user = await UserModel.findById(req.params.id);
   if (!user) {
     throw new Error("User not found");
@@ -75,7 +75,7 @@ router.get("/users/:id/avatar", async (req, res) => {
   res.send(user.avatar);
 });
 
-router.post("/users/login", async (req, res) => {
+router.post("/users/login", async (req: Request, res: Response) => {
   try {
     const user = await UserModel.findByCredentials(
       req.body.email,
@@ -94,7 +94,7 @@ router.post("/users/login", async (req, res) => {
   }
 });
 
-router.post("/users/logout", auth, async (req, res) => {
+router.post("/users/logout", auth, async (req: Request, res: Response) => {
   try {
     if (!req.user.token) {
       return res.status(404).send({ error: "User was not logged in!" });
@@ -108,7 +108,7 @@ router.post("/users/logout", auth, async (req, res) => {
   }
 });
 
-router.get("/users", auth, async (req, res) => {
+router.get("/users", auth, async (req: Request, res: Response) => {
   try {
     const users = await UserModel.find({});
     res.send(users);
@@ -117,7 +117,7 @@ router.get("/users", auth, async (req, res) => {
   }
 });
 
-router.get("/users/:id", auth, async (req, res) => {
+router.get("/users/:id", auth, async (req: Request, res: Response) => {
   const _id = req.params.id;
 
   try {
@@ -133,7 +133,7 @@ router.get("/users/:id", auth, async (req, res) => {
   }
 });
 
-router.patch("/users", auth, async (req, res) => {
+router.patch("/users", auth, async (req: Request, res: Response) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = ["name", "email", "password", "age"];
   const isValidOperation = updates.every((update) =>
@@ -154,7 +154,7 @@ router.patch("/users", auth, async (req, res) => {
   }
 });
 
-router.patch("/users/:id", auth, async (req, res) => {
+router.patch("/users/:id", auth, async (req: Request, res: Response) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = ["name", "email", "password", "age"];
   const isValidOperation = updates.every((update) =>
@@ -180,7 +180,7 @@ router.patch("/users/:id", auth, async (req, res) => {
   }
 });
 
-router.delete("/users", auth, async (req, res) => {
+router.delete("/users", auth, async (req: Request, res: Response) => {
   try {
     await req.user.remove();
     sendByeByeEmail(req.user.email, req.user.name);
@@ -190,7 +190,7 @@ router.delete("/users", auth, async (req, res) => {
   }
 });
 
-router.delete("/users/:id", auth, async (req, res) => {
+router.delete("/users/:id", auth, async (req: Request, res: Response) => {
   try {
     const user = await UserModel.findByIdAndRemove(req.params.id);
     if (!user) {
