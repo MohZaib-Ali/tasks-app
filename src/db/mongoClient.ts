@@ -1,4 +1,3 @@
-
 const { MongoClient, ObjectId } = require("mongodb");
 require('dotenv').config();
 const serverURL = `mongodb+srv://${process.env.DB_USERNAME}:${encodeURIComponent(process.env.DB_PASS)}@test.lvhnd.mongodb.net`;
@@ -9,7 +8,7 @@ MongoClient.connect(serverURL, { useNewUrlParser: true, useUnifiedTopology: true
     }
 
     const db = client.db(dbName);
-    Challenge
+    // Challenge
     db.collection('dailyTasks').findOne({ "_id": new ObjectId('62a1729a5fe9cca493560dfd') }, (err, result) => {
         if (err) return console.log(err);
         console.log(result)
