@@ -10,10 +10,12 @@ const taskSchema = new Schema({
         type: Boolean,
         default: false
     },
-    userId: {
+    owner: {
         type: Schema.Types.ObjectId,
         ref: 'User'
     }
+}, {
+    timestamps: true
 });
 
 const TaskModel = model('Task', taskSchema);

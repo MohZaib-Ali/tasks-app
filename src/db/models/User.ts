@@ -2,6 +2,7 @@ import { Model, model, Schema } from "mongoose";
 import validator from "validator";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import TaskModel from "./Task";
 
 const userSchema = new Schema({
   name: {
@@ -24,8 +25,8 @@ const userSchema = new Schema({
   age: {
     type: Number,
     validate: (value: number) => {
-      if (value < 0) {
-        throw new Error("Invalid age.");
+      if (value < 18) {
+        throw new Error("User over age 18 are allowed");
       }
     },
   },
@@ -39,7 +40,29 @@ const userSchema = new Schema({
       }
     },
   },
+  token: {
+    type: String,
+  },
+  avatar: {
+    type: Buffer,
+  }
+}, {
+  timestamps: true
 });
+
+userSchema.virtual("tasks", {
+  ref: "Task",
+  localField: "_id",
+  foreignField: "owner",
+});
+
+userSchema.methods.toJSON = function () {
+  const user = this.toObject();
+  delete user.token;
+  delete user.password;
+  delete user.avatar;
+  return user
+}
 
 userSchema.statics.findByCredentials = async function (email, password) {
   const user = await this.findOne({ email });
@@ -60,8 +83,17 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+userSchema.pre("remove", async function (next) {
+  await TaskModel.deleteMany({owner: this._id})
+  next();
+});
+
 userSchema.methods.getToken = function async() {
-  const token = jwt.sign({ _id: this._id.toString() }, process.env.SECRET_KEY, { expiresIn: '5d' });
+  const token = jwt.sign({ _id: this._id.toString() }, process.env.SECRET_KEY, {
+    expiresIn: "5d",
+  });
+  this.token = token;
+  this.save();
   return token;
 };
 
@@ -70,6 +102,10 @@ interface UserDocument extends Document {
   email: string;
   age: number;
   password: string;
+  token: [string];
+  tasks: [];
+  avatar: Buffer;
+  _doc?: any;
 }
 
 interface UserDocModel extends UserDocument {
