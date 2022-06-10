@@ -1,8 +1,6 @@
 import MongoDB from "./db/mongoose";
 import userRouter from "./routers/User";
 import taskRouter from "./routers/Task";
-import env from "dotenv";
-env.config();
 import express from "express";
 import http from "http";
 import cors from "cors";

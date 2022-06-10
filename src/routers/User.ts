@@ -32,7 +32,7 @@ router.post("/users", async (req: Request, res: Response) => {
     sendWelcomeEmail(user.email, user.name);
     res.status(200).send({ user, token });
   } catch (e) {
-    res.status(400).send();
+    res.status(400).send(e.message);
   }
 });
 
