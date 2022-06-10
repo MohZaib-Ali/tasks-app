@@ -97,7 +97,7 @@ userSchema.methods.getToken = function async() {
   return token;
 };
 
-interface UserDocument extends Document {
+export interface UserDocument extends Document {
   name: string;
   email: string;
   age: number;
