@@ -4,7 +4,7 @@ import taskRouter from "./routers/Task";
 import env from "dotenv";
 env.config();
 import express from "express";
-import http from "http";
+import https from "https";
 import cors from "cors";
 import errorHandler from "./middleware/error";
 
@@ -16,7 +16,7 @@ const dbURL = `mongodb+srv://${process.env.DB_USERNAME}:${encodeURIComponent(
 const dbName = "tasks";
 
 const app = express();
-const server = http.createServer(app);
+const server = https.createServer(app);
 
 app.use((req, res, next) => {
   if (process.env.inMaintenance === "true") {
