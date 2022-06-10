@@ -1,4 +1,3 @@
-import { UserDocument } from "../../db/models/User";
 import express from "express";
 
 declare global {
