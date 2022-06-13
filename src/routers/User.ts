@@ -30,7 +30,7 @@ router.post("/users", async (req: Request, res: Response) => {
       _doc: { token },
     } = user;
     sendWelcomeEmail(user.email, user.name);
-    res.status(200).send({ user, token });
+    res.status(201).send({ user, token });
   } catch (e) {
     res.status(400).send(e.message);
   }
@@ -48,7 +48,7 @@ router.post(
         .toBuffer();
       req.user.avatar = buffer;
       await req.user.save();
-      res.send({ message: "Avatar uploaded successfully!" });
+      res.status(201).send({ message: "Avatar uploaded successfully!" });
     } catch (e) {
       res.status(400).send();
     }
@@ -184,7 +184,7 @@ router.delete("/users", auth, async (req: Request, res: Response) => {
   try {
     await req.user.remove();
     sendByeByeEmail(req.user.email, req.user.name);
-    res.send(req.user);
+    res.status(200).send(req.user);
   } catch (e) {
     res.status(500).send();
   }
@@ -196,7 +196,7 @@ router.delete("/users/:id", auth, async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).send({ error: "User does not exist" });
     }
-    res.send(user);
+    res.status(200).send(user);
   } catch (e) {
     res.status(500).send();
   }

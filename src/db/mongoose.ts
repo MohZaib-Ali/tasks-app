@@ -1,10 +1,10 @@
 import { connect } from 'mongoose';
 
-const MongoDBCreate = (dbURL: string, dbName: string) => {
+const MongoDBCreate = (dbURL: string) => {
     connect(dbURL, {
-        dbName
+        dbName: process.env.DB_NAME
     // tslint:disable-next-line: no-console
-    }, (err) => !err && console.log('DB connection established!'));
+    });
 }
 
 
